@@ -1,0 +1,92 @@
+<?php
+	
+	require_once("../Acceso/Config.php"); // Definición de las variables globales	
+	require_once("../Modelos/Alertas.php");
+	
+	$notificar 		= new Alertas();	
+	$listaNotificar	= $notificar->listaAlertasExpedientesArchivados();
+	
+	
+	$server_email	= "www.sigmin.co";
+	
+	$para			= $notificar->getEmailArchivadas();	
+	//$para			= "asesorservicios2005@gmail.com";
+
+	$asuntoMsg 		= ':: Alertas SIGMIN ::';
+	$listaPlacas	= "";
+
+	echo "<h2>::: SIGMIN ::: Notificaci&oacute;n por Liberaci&oacute;n de &Aacute;rea</h2>";
+	
+	// mensaje	
+	$mensaje 		= "	
+	<table border='0'>
+		<tr>
+			<td colspan='2'><h2>::: SIGMIN ::: Notificaci&oacute;n por Liberaci&oacute;n de &Aacute;rea</h2></td>
+		</tr>
+	";
+	
+	// Se genera la lista de todas las placas pendientes de archivo
+	foreach($listaNotificar as $cadaNotificacion) {
+
+		$listaPlacas	.= $cadaNotificacion["placa"].", ";
+		$mensaje 		.= "	
+				<tr>
+					<td colspan='2'><hr size='1'></td>
+				</tr>
+				<tr>
+					<td><b>Placa Liberada:</b></td>
+					<td>{$cadaNotificacion["placa"]}</td>
+				</tr>
+				<tr>
+					<td><b>Tipo de Expediente:</b></td>
+					<td>{$cadaNotificacion["tipo_expediente"]}</td>
+				</tr>	
+				<tr>
+					<td><b>Modalidad del Expediente:</b></td>
+					<td>{$cadaNotificacion["modalidad"]}</td>
+				</tr>				
+				<tr>
+					<td><b>Fecha de Ejecutoria:</b></td>
+					<td>{$cadaNotificacion["fecha_notificacion"]}</td>
+				</tr>				
+				<tr>
+					<td><b>Vigencia del &Aacute;rea hasta:</b></td>
+					<td>{$cadaNotificacion["fecha_vencimiento"]}</td>
+				</tr>
+				<tr>
+					<td><b>Minerales:</b></td>
+					<td>{$cadaNotificacion["minerales"]}</td>
+				</tr>				
+				<tr>
+					<td><b>Titulares:</b></td>
+					<td>{$cadaNotificacion["personas"]}</td>
+				</tr>				
+				<tr>
+					<td><b>Municipios:</b></td>
+					<td>{$cadaNotificacion["municipios"]}</td>
+				</tr>
+				<tr><td colspan='2'><hr size='1'></td></tr>
+				<tr>
+					<td colspan='2'>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<b><a href='http://www.sigmin.co/administracion/visorCapturas/visualizaPoligonoEmail.php?codExpediente={$cadaNotificacion["placa"]}&clasificacion={$cadaNotificacion["tipo_expediente"]}' title='Ver poligono asociado al expediente {$cadaNotificacion["placa"]}' target='_blank'>Poligono Asociado</a></b>
+					</td>
+				</tr>
+				<tr>
+					<td colspan='2'>&nbsp;</td>
+				</tr>
+		";
+	}	
+
+	$mensaje .= "<tr>
+					<td colspan='2'><hr size='1'></td>
+				</tr>
+			</table>
+	";
+	
+	// funcion de envío de email
+	$res = $notificar->enviar_email($server_email, $para, $asuntoMsg, $mensaje);
+	echo "<hr>Placas reportadas: $listaPlacas - Respuesta Proceso es: ".$res."</hr>";	
+
+	
+?>

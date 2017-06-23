@@ -1,0 +1,137 @@
+<?php
+	$codigoExpediente = $_GET["codigoExpediente"];
+	$centroideLon  = $_GET["centroideLon"];
+	$centroideLat  = $_GET["centroideLat"];
+	$servicio = "http://www.sigmin.co:8080/geoserver/CMQ/wms";
+	$cobertura = $_GET["cobertura"];
+	$tituloCobertura = $_GET["tituloCobertura"];
+	$areaPoly =  $_GET["areaPoly"];
+	//$perimetroPoly = $_GET["perimetroPoly"];
+?>
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>OpenLayers Google Layer Example</title>
+    <link rel="stylesheet" href="estilos/style.css" type="text/css">
+    <!-- <link rel="stylesheet" href="estilos/google.css" type="text/css"> -->
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <!-- this gmaps key generated for http://openlayers.org/dev/ -->
+	<script src="http://maps.google.com/maps/api/js?key=AIzaSyBXS5guPsMcAdCwrujD-1KsyYkgoE87PUM&amp;sensor=false"></script>	
+
+    <script src="OpenLayers.js"></script>
+    <script type="text/javascript">
+        var map;
+
+		var projection = new OpenLayers.Projection("EPSG:900913"),
+		var displayProjection = new OpenLayers.Projection("EPSG:4326");	
+
+		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+		OpenLayers.Util.onImageLoadErrorColor = "transparent";
+		OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";
+
+        function init() {	
+		  var
+			options = {
+			  controls: [
+				new OpenLayers.Control.Navigation(),
+				new OpenLayers.Control.PanZoomBar(),
+				new OpenLayers.Control.LayerSwitcher(),
+				new OpenLayers.Control.MouseDefaults(),
+				new OpenLayers.Control.KeyboardDefaults()
+			  ],
+			  projection: projection,
+			  displayProjection: displayProjection,
+			  units: "meters",
+			  numZoomLevels: 22 /* 18 */
+			};		
+			
+            map = new OpenLayers.Map('map'); //, options);
+			
+			
+            map.addControl(new OpenLayers.Control.LayerSwitcher());
+            
+			var gmap = new OpenLayers.Layer.Google(
+				"Google Streets", // the default
+				{numZoomLevels: 20, visibility: false}
+			),
+			gsat = new OpenLayers.Layer.Google(
+				"Google Satellite", 
+				{type: google.maps.MapTypeId.SATELLITE, transparent: true, numZoomLevels: 22}
+			),
+			gphy = new OpenLayers.Layer.Google(
+				"Google Physical",
+				{type: google.maps.MapTypeId.TERRAIN, visibility: false}
+			),
+			ghyb = new OpenLayers.Layer.Google(
+				"Google Hybrid",
+				{type: google.maps.MapTypeId.HYBRID, numZoomLevels: 22, visibility: false}
+			);
+			
+			var cmqLayer = new OpenLayers.Layer.WMS("prueba Polys",
+					"http://www.sigmin.co:8080/geoserver/CMQ/wms", {
+                    layers: "prospectos",
+                    transparent: true,
+                    format: "image/png"
+                }, 
+				{ opacity: .65, singleTile: true },
+				{
+                    isBaseLayer: false,
+                    buffer: 0,
+                    // exclude this layer from layer container nodes
+                    displayInLayerSwitcher: false,
+                    visibility: true
+                }				
+            );			
+			
+			var cmqLayer2 = new OpenLayers.Layer.WMS("<?php echo $tituloCobertura ?>",
+					"<?php echo $servicio ?>", {
+                    layers: "<?php echo $cobertura ?>",
+                    transparent: true,
+                    format: "image/png"
+                }, 
+				{ opacity: 0.65, singleTile: true },
+				{
+                    isBaseLayer: false,
+                    buffer: 0,
+                    // exclude this layer from layer container nodes
+                    displayInLayerSwitcher: false,
+                    visibility: true
+                }
+            );
+
+			var cmqLayer3 = new OpenLayers.Layer.WMS("Municipios",
+					"<?php echo $servicio ?>", {
+                    layers: "Municipios",
+                    transparent: true,
+                    format: "image/png"
+                }, 
+				{ opacity: 0.65, singleTile: true },
+				{
+                    isBaseLayer: false,
+                    buffer: 0,
+                    // exclude this layer from layer container nodes
+                    displayInLayerSwitcher: false,
+                    visibility: true
+                }
+            );
+			
+            map.addLayers([ gmap, gphy, ghyb, cmqLayer2, cmqLayer3]);
+
+            //map.setCenter(new OpenLayers.LonLat(<?php echo $centroideLon ?>, <?php echo $centroideLat ?>), 10);
+			map.setCenter(new OpenLayers.LonLat(<?php echo $centroideLon ?>, <?php echo $centroideLat ?>).transform(
+				displayProjection,
+				projection
+		    ), 10);			
+        }
+    </script>
+  </head>
+  <body onload="init()">
+    <div id="map" class="smallmap"></div>
+    <div id="docs">
+		<?php echo "Ubicaci&oacute;n del expediente: <b>".$codigoExpediente."</b>. Area Has: ".($areaPoly); ?>
+    </div>
+  </body>
+</html>

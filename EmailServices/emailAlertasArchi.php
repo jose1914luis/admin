@@ -27,7 +27,7 @@ echo $emailRs;
 if (!empty($emailRs["mensaje"])) {
 
     $correo = new Correo();
-    $msg = $correo->enviar_email($emailRs["emails_alertas"], "Alerta Liberaci�n de �reas :: RELEASE", $emailRs["mensaje"]);
+//    $msg = $correo->enviar_email($emailRs["emails_alertas"], "Alerta Liberaci�n de �reas :: RELEASE", $emailRs["mensaje"]);
 } else
     $msg = "Error en envio";
 

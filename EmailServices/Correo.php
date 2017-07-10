@@ -20,9 +20,8 @@ class Correo {
 
     public function enviar_email($emails, $asuntoMsg, $body) {
 
-
         $this->from = new SendGrid\Email(null, "sigmin@sigmin.com.co");
-        $this->to = new SendGrid\Email($emails);
+        $this->to = new SendGrid\Email(null, "sigmin@sigmin.com.co");
         $this->subject = $asuntoMsg;
 
         // mensaje
@@ -38,9 +37,18 @@ class Correo {
 		";
         $this->content = new SendGrid\Content("text/html", $mensaje);
         $mail = new SendGrid\Mail($this->from, $this->subject, $this->to, $this->content);
+
+        $correos = explode(",", $emails);
+
+        foreach ($correos as $key => $value) {
+
+            $email2 = new SendGrid\Email(null, $value);
+            $mail->personalization[0]->addTo($email2);
+        }
+
+        
         $sg = new \SendGrid($this->apiKey);
         $response = $sg->client->mail()->send()->post($mail);
-
         return $response;
     }
 

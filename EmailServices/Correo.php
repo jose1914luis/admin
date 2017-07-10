@@ -22,7 +22,7 @@ class Correo {
 
 
         $this->from = new SendGrid\Email(null, "sigmin@sigmin.com.co");
-        $this->to = new SendGrid\Email(null, $emails);
+        $this->to = new SendGrid\Email($emails);
         $this->subject = $asuntoMsg;
 
         // mensaje
